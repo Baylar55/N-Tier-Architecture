@@ -25,7 +25,7 @@ namespace Web.Services.Concrete
         }
         public async Task<bool> RegisterUserAsync(AccountRegisterVM model)
         {
-            if (_modelState.IsValid) return false;
+            if (!_modelState.IsValid) return false;
             var user = new User
             {
                 FullName = model.Fullname,
@@ -45,7 +45,7 @@ namespace Web.Services.Concrete
         }
         public async Task<bool> LoginUserAsync(AccountLoginVM model)
         {
-            if (_modelState.IsValid) return false;
+            if (!_modelState.IsValid) return false;
 
             var user = await _userManager.FindByNameAsync(model.Username);
             if (user == null)

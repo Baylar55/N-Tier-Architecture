@@ -49,6 +49,7 @@ namespace Web.Controllers
                 return RedirectToAction("index", "product");
             }
         }
+        
         public async Task<IActionResult> Logout()
         {
             await _accountService.LogoutAsync();

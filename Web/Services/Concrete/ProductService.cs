@@ -144,7 +144,7 @@ namespace Web.Services.Concrete
         public async Task<ProductUpdateVM> GetUpdateModelAsync(int id)
         {
             var category = await _categoryRepository.GetAllAsync();
-            
+
             var product = await _productRepository.GetProductWithProductPhotos(id);
 
             if (product == null) return null;
@@ -158,7 +158,7 @@ namespace Web.Services.Concrete
                 CategoryId = product.CategoryId,
                 Weight = product.Weight,
                 Cost = product.Cost,
-                ProductPhotos=product.ProductPhotos,
+                ProductPhotos = product.ProductPhotos,
                 Categories = category.Select(c => new SelectListItem
                 {
                     Text = c.Title,
@@ -171,7 +171,14 @@ namespace Web.Services.Concrete
 
         public async Task<bool> UpdateAsync(ProductUpdateVM model)
         {
+            var category = await _categoryRepository.GetAllAsync();
             var dbProduct = await _productRepository.GetAsync(model.Id);
+            model.Categories = category.Select(c => new SelectListItem
+            {
+                Text = c.Title,
+                Value = c.Id.ToString()
+            }).ToList();
+            if (!_modelState.IsValid) return false;
             if (dbProduct == null) return false;
             dbProduct.Cost = model.Cost;
             dbProduct.Name = model.Name;
@@ -198,40 +205,26 @@ namespace Web.Services.Concrete
 
             bool hasError = false;
 
-            if (model.ProductPhotos != null)
-            {
-                foreach (var photo in model.ProductPhotos)
-                {
-                    if (!_fileService.IsImage(model.Photo))
-                    {
-                        _modelState.AddModelError("Photo", $"{photo.Name} should be in image format");
-                        hasError = true;
-                    }
-                    else if (!_fileService.CheckSize(model.Photo, 400))
-                    {
-                        _modelState.AddModelError("Photo", $"{photo.Name}'s size sould be smaller than 400kb");
-                        hasError = true;
-                    }
-                }
-            }
-            if (hasError) return hasError;
-
+            int order = 1;
             if (model.Photos != null)
             {
                 foreach (var photo in model.Photos)
                 {
                     if (!_fileService.IsImage(photo))
                     {
-                        _modelState.AddModelError("Photos", "File must be image");
+                        _modelState.AddModelError("Photos", $"{photo.FileName} must be image");
                         hasError = true;
                     }
                     else if (!_fileService.CheckSize(photo, 400))
                     {
-                        _modelState.AddModelError("Photos", $"Photo size must be less 400kb");
+                        _modelState.AddModelError("Photos", $"{photo.FileName} size must be less 400kb");
                         hasError = true;
                     }
 
-                    int order = 1;
+                }
+                if (hasError) return false;
+                foreach (var photo in model.Photos)
+                {
                     var productPhoto = new ProductPhoto
                     {
                         Name = await _fileService.UploadAsync(photo),
@@ -239,13 +232,9 @@ namespace Web.Services.Concrete
                         ProductId = dbProduct.Id
                     };
                     order++;
-
                     await _productPhotoRepository.UpdateAsync(productPhoto);
-
                 }
-                if (hasError) return hasError;
             }
-
             await _productRepository.UpdateAsync(dbProduct);
             return true;
         }
@@ -307,17 +296,17 @@ namespace Web.Services.Concrete
             var dbProductPhoto = await _productPhotoRepository.GetAsync(id);
             if (dbProductPhoto == null) return false;
             dbProductPhoto.Order = model.Order;
-            model.ProductId=dbProductPhoto.ProductId;
-            await _productPhotoRepository.UpdateAsync(dbProductPhoto);    
+            model.ProductId = dbProductPhoto.ProductId;
+            await _productPhotoRepository.UpdateAsync(dbProductPhoto);
             return true;
         }
 
-        public async Task<bool> DeletePhotoAsync(int id,ProductPhotoDeleteVM model)
+        public async Task<bool> DeletePhotoAsync(int id, ProductPhotoDeleteVM model)
         {
-            var productPhoto= await _productPhotoRepository.GetAsync(id);
+            var productPhoto = await _productPhotoRepository.GetAsync(id);
             if (productPhoto == null) return false;
             _fileService.Delete(productPhoto.Name);
-            model.ProductId= productPhoto.ProductId;
+            model.ProductId = productPhoto.ProductId;
             await _productPhotoRepository.DeleteAsync(productPhoto);
 
             return true;

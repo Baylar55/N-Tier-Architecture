@@ -6,6 +6,10 @@ namespace Web.ViewModels.Product
 {
     public class ProductUpdateVM
     {
+        public ProductUpdateVM()
+        {
+            ProductPhotos= new List<ProductPhoto>();
+        }
         public int Id { get; set; }
         public string Name { get; set; }
         public IFormFile? Photo { get; set; }
@@ -18,6 +22,6 @@ namespace Web.ViewModels.Product
         public int CategoryId { get; set; }
         public Status StatusType { get; set; }
         public List<ProductPhoto>? ProductPhotos { get; set; }
-        public List<IFormFile> Photos { get; set; }
+        public List<IFormFile>? Photos { get; set; }
     }
 }

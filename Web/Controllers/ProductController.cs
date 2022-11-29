@@ -53,7 +53,7 @@ namespace Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Update(ProductUpdateVM model, int id)
         {
-            if (!ModelState.IsValid) return View(model);
+            
             if (id != model.Id) return BadRequest();
             var isSucceeded = await _productService.UpdateAsync(model);
             if (isSucceeded) return RedirectToAction(nameof(Index));

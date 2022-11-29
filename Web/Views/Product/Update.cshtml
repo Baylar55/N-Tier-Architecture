@@ -70,9 +70,9 @@
                                 <label asp-for="Photos">Product Photos</label>
                                 <input class="form-control" asp-for="Photos">
                                 @{
-                                    if (Html.ViewData.ModelState["ProductPhotos"] != null)
+                                    if (Html.ViewData.ModelState["Photos"] != null)
                                     {
-                                        foreach (var error in Html.ViewData.ModelState["ProductPhotos"].Errors)
+                                        foreach (var error in Html.ViewData.ModelState["Photos"].Errors)
                                         {
                                             <li>@error.ErrorMessage</li>
                                         }
